@@ -2,13 +2,12 @@ from .kfij import Kfij
 
 class Set(Kfij):
     factory = set
-    def load(self, fp):
-        for line in fp:
-            self.add(line.rstrip('\r\n'))
-    def dump(self, fp):
+    def load(self):
+        for line in self.readlines():
+            self.add(line)
+    def dump(self):
         for x in self:
-            fp.write(x + '\n')
-
+            self.writeline(x)
     def add(self, x):
         '''
         :param str x: Item to be added to the set

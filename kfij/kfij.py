@@ -52,16 +52,21 @@ class Kfij:
 
         self._fp = open(filename, 'a')
 
-    def writeline(text):
+    def readlines(self):
+        for line in self._fp:
+            yield line.rstrip('\r\n')
+
+    def writelines(self, lines):
         '''
         Write a line to the file
 
-        :param str text: Text line to be written
+        :param iter lines: Iterable of str lines to be written
         :raises NotImplementedError: If the line contains carriage return or newline
         '''
-        if not isinstance(text, str) or '\r' in x or '\n' in x:
-            raise NotImplementedError('Can\'t handle this sort of value')
-        self._fp.write(text + '\n')
+        for text in lines:
+            if not isinstance(text, str) or '\r' in x or '\n' in x:
+                raise NotImplementedError('Can\'t handle this sort of value')
+            self._fp.write(text + '\n')
 
     @staticmethod
     def factory(*args, **kwargs):
