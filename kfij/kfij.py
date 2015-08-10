@@ -28,19 +28,27 @@ class Kfij:
         self._fp = open(filename, 'a')
 
     @staticmethod
-    def kfij_factory(*args, **kwargs):
+    def factory(*args, **kwargs):
         '''
         You must set the factory equal to the class that the present class is mimicing, such as set or list.
         '''
         raise NotImplementedError('You must set the %s.kfij_factory.', self.__class__.__name__)
 
-    def kfij_extend(self, old):
+    def load_line(self, line):
         '''
-        You must set this to the function to a function that extends
-        the present Kfij with the data from an old one.
-        This is "extend" for sets and "update" for dicts, for example.
+        The load_line method should take a string line from a file and update the present
+        object accordingly.
+        '''
+        raise NotImplementedError('You must set the %s.kfij_factory.', self.__class__.__name__)
+
+    def dump(self, fp):
+        '''
+        You must set this to the function to a function that serializes the present
+        object in a form that the load_line function can parse.
         '''
         raise NotImplementedError('You must set the %s.kfij_extend.', self.__class__.__name__)
+        for x in self:
+            fp.write(x + '\n')
 
     @classmethod
     def apply_destructive_funcs(Class, *func_names):
@@ -92,16 +100,4 @@ safe_func_names =  [
 ]
 destructive_func_names = [
 
-
-    def add(self, x):
-        '''
-        :param str x: Item to be added to the set
-        '''
-        if not isinstance(x, str) or '\r' in key or '\n' in key:
-            raise NotImplementedError('Can\'t handle this sort of value')
-
-        # Filter
-        if x not in self._x:
-            self._set.add(key)
-            self._fp.write(key + '\n')
 
