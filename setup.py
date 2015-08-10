@@ -8,6 +8,7 @@ setup(name='kfij',
       packages=['kfij'],
       tests_require = [
           'pytest>=2.6.4',
+          'pytest-quickcheck>=0.8.2',
       ],
       version='0.0.1',
       license='LGPL',
