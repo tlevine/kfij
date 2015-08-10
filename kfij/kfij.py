@@ -45,12 +45,12 @@ class Kfij:
 
         if os.path.exists(filename):
             with open(filename, 'r') as fp:
-                self.cache = self.load(fp)
+                self.load(fp)
         else:
-            self.cache = self.factory(*args, **kwargs)
             with open(filename, 'w') as fp:
                 self.dump(fp)
 
+        self.cache = self.factory(*args, **kwargs)
         self.fp = open(filename, 'a')
         self._lock = False
 

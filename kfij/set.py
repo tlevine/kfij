@@ -23,7 +23,7 @@ class Set(Kfij):
 
 Set.enable_safe_funcs('copy', 'isdisjoint', 'issubset',
                       'difference', 'union', 'intersection', 'symmetric_difference',
-                      '__contains__', '__len__',
+                      '__contains__', '__len__', '__iter__',
                       '__sub__', '__rsub__',
                       '__and__', '__or__',
                       '__rand__', '__ror__', '__rxor__',
