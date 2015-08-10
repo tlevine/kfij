@@ -13,7 +13,7 @@ class Set(Kfij):
     def add(self, x):
         # Filter
         if x not in self.cache:
-            self.writeline(x)
+            self.writelines([x])
             self.cache.add(x)
 
     @wraps(set.update)
