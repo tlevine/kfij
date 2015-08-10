@@ -16,26 +16,49 @@ class Kfij:
 
         if os.path.exists(filename):
             with open(filename, 'r') as fp:
-                self._set = set(line.rstrip('\r\n') for line in fp)
+                self._cache = self.factory(line.rstrip('\r\n') for line in fp)
         else:
             with open(filename, 'w') as fp:
                 fp.write('')
-            self._set = set()
+            self._cache = self.factory()
 
         self._fp = open(filename, 'a')
 
-    @classmethod
-    def set_appender(Class, func_name):
-        Class._kfij_appender = func_name
+    @staticmethod
+    def factory(*args, **kwargs):
+        '''
+        You must set the factory equal to the class that the present class is mimicing, such as set or list.
+        '''
+        raise NotImplementedError('You must set the %s.factory.', self.__class__.__name__)
+
+    def appender(*args, **kwargs):
+        '''
+        You must set this to the function that adds a new line.
+        This is "add" for sets and "append" for lists, for example.
+        '''
+        raise NotImplementedError('You must set the %s.appender.', self.__class__.__name__)
 
     @classmethod
     def apply_destructive_funcs(Class, *func_names):
-        getattr(self._set)
-        os.remove
-        close fp
+        for func_name in func_names:
+
+            f = getattr(self._cache, func_name)
+
+            @wraps(f)
+            def g(self, *args, **kwargs):
+                if self._lock:
+                    raise EnvironmentError('%s is locked' % repr(self))
+                self._lock = True
+                self._fp.close()
+                os.remove(self._fp.name)
+                f(*args, **kwargs)
+                self._lock = False
+                return output
+
+            setattr(Class, func_name, g)
 
     @classmethod
-    def apply_safe_func(Class, *func_names):
+    def apply_safe_funcs(Class, *func_names):
         for func_name in func_names:
 
             f = getattr(self._cache, func_name)
