@@ -80,12 +80,9 @@ class Kfij:
                 f(*args, **kwargs)
 
                 self._fp = open(self._fp.name, 'a')
-
-                for args in self._cache:
-                    self.appender(*args)
+                self.dump(self._fp)
 
                 self._lock = False
-
                 return output
 
             setattr(Class, func_name, g)
