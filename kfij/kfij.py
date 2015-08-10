@@ -1,5 +1,13 @@
 from functools import wraps
 
+def unlocked(func):
+    @wraps(func)
+    def f(self, *args, **kwargs):
+        if self._lock:
+            raise EnvironmentError('%s is locked' % repr(self))
+        return func(self, *args, **kwargs)
+    return f
+
 class Kfij:
     '''
     Persist a set-like structure to a file.
@@ -9,10 +17,12 @@ class Kfij:
     multiple threads. It is unsafe to get any more
     concurrent than that.
     '''
+    @unlocked
     def __init__(self, filename, *args, **kwargs):
         '''
         :param str filename: File at which to save state
         '''
+        self._lock = True
 
         if len(args) + len(kwargs) > 0:
             with open(filename, 'w') as fp:
@@ -26,6 +36,7 @@ class Kfij:
             self._cache = self.kfij_factory()
 
         self._fp = open(filename, 'a')
+        self._lock = False
 
     @staticmethod
     def factory(*args, **kwargs):
@@ -60,10 +71,8 @@ class Kfij:
             f = getattr(self._cache, func_name)
 
             @wraps(f)
+            @unlocked
             def g(self, *args, **kwargs):
-                if self._lock:
-                    raise EnvironmentError('%s is locked' % repr(self))
-
                 self._lock = True
                 self._fp.close()
 
