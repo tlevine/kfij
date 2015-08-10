@@ -55,24 +55,20 @@ class Kfij:
             raise EnvironmentError('If the file already exists, no *args or **kwargs may be set.')
 
         self.cache = self.factory(*args, **kwargs)
+        self._fp = open(filename, 'a')
 
         self._force = True
-        if os.path.exists(filename):
-            with open(filename, 'r') as fp:
-                self._fp = fp
-                self.load()
+        if os.path.exists(self._fp.name):
+            self.load()
         else:
-            with open(filename, 'w') as fp:
-                self._fp = fp
-                self.dump()
+            self.dump()
         self._force = False
-
-        self._fp = open(filename, 'a')
 
     def readlines(self):
         out = []
-        for line in self._fp:
-            out.append(line.rstrip('\r\n'))
+        with open(self._fp.name, 'r') as fp:
+            for line in fp:
+                out.append(line.rstrip('\r\n'))
         return out
 
     def writelines(self, lines):
@@ -86,6 +82,7 @@ class Kfij:
             if not isinstance(text, str) or '\r' in text or '\n' in text:
                 raise NotImplementedError('Can\'t handle this sort of value')
             self._fp.write(text + '\n')
+        self._fp.flush()
 
     @staticmethod
     def factory(*args, **kwargs):
