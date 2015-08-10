@@ -37,10 +37,16 @@ class Set:
             self._set.add(key)
             self._fp.write(key + '\n')
 
-    def copy(self):
-        discard
+    @classmethod
+    def _apply_destructive_func(func_name):
+        getattr(self._set)
+        os.remove
+        close fp
+
+        
 
 safe_func_names =  [
+    'copy',
     'difference', 'union', 'intersection', 'symmetric_difference',
     'isdisjoint', 'issubset',
 ]
