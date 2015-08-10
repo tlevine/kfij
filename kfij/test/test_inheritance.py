@@ -8,7 +8,7 @@ from .. import Kfij, List, Set
 
 def testcases(*Classes):
     for Class in Classes:
-        method_names = set(dir(Class)) - set(dir(Kfij)) - {'__iter__'}
+        method_names = set(dir(Class)) - set(dir(Kfij)) - {'__iter__', '__reversed__'}
         yield from itertools.product([Class], method_names, [tuple(), ('abc',)])
 
 @pytest.mark.parametrize('Class, method_name, args', testcases(List, Set))
