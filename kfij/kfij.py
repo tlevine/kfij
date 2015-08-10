@@ -79,35 +79,32 @@ class Kfij:
     @classmethod
     def enable_destructive_funcs(Class, *func_names):
         for func_name in func_names:
-
-            f = getattr(Class.factory, func_name)
-
-            @wraps(f)
             @unlocked
-            def g(self, *args, **kwargs):
+            def func(self, *args, **kwargs):
+                assert False
                 self._lock = True
                 self.fp.close()
 
                 os.remove(self.fp.name)
-                f(self.cache, *args, **kwargs)
+
+                output = getattr(self.cache, func_name)(self.cache, *args, **kwargs)
 
                 self.fp = open(self._fp.name, 'a')
                 self.dump(self.fp)
 
                 self._lock = False
                 return output
-
-            setattr(Class, func_name, g)
+            setattr(Class, func_name, func)
 
     @classmethod
     def enable_safe_funcs(Class, *func_names):
         for func_name in func_names:
+            _enable_safe_func(Class, func_name)
 
-            f = getattr(Class.factory, func_name)
-
-            @wraps(f)
-            @unlocked
-            def g(self, *args, **kwargs):
-                return f(self.cache, *args, **kwargs)
-
-            setattr(Class, func_name, g) 
+def _enable_safe_func(Class, func_name):
+    _func_name = str(func_name)
+    @wraps(getattr(Class.factory, _func_name))
+    @unlocked
+    def func(self, *args, **kwargs):
+        return getattr(self.cache, _func_name)(*args, **kwargs)
+    setattr(Class, func_name, func) 
