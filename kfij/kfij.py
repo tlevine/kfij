@@ -38,10 +38,10 @@ class Kfij:
         :param str filename: File at which to save state
         :raises EnvironmentError: If the file already exists and any *args or **kwargs are set
         '''
-        self._lock = True
-
         if os.path.exists(filename) and len(args) + len(kwargs) > 0:
             raise EnvironmentError('If the file already exists, no *args or **kwargs may be set.')
+
+        self.cache = self.factory(*args, **kwargs)
 
         if os.path.exists(filename):
             with open(filename, 'r') as fp:
@@ -50,9 +50,7 @@ class Kfij:
             with open(filename, 'w') as fp:
                 self.dump(fp)
 
-        self.cache = self.factory(*args, **kwargs)
-        self.fp = open(filename, 'a')
-        self._lock = False
+        self._fp = open(filename, 'a')
 
     @staticmethod
     def factory(*args, **kwargs):
@@ -83,14 +81,14 @@ class Kfij:
             def func(self, *args, **kwargs):
                 assert False
                 self._lock = True
-                self.fp.close()
+                self._fp.close()
 
-                os.remove(self.fp.name)
+                os.remove(self._fp.name)
 
                 output = getattr(self.cache, func_name)(self.cache, *args, **kwargs)
 
-                self.fp = open(self._fp.name, 'a')
-                self.dump(self.fp)
+                self._fp = open(self._fp.name, 'a')
+                self.dump(self._fp)
 
                 self._lock = False
                 return output
