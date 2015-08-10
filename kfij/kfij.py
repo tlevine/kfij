@@ -70,8 +70,10 @@ class Kfij:
         self._fp = open(filename, 'a')
 
     def readlines(self):
+        out = []
         for line in self._fp:
-            yield line.rstrip('\r\n')
+            out.append(line.rstrip('\r\n'))
+        return out
 
     def writelines(self, lines):
         '''
