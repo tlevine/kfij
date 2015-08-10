@@ -13,27 +13,36 @@ class Kfij:
     Persist a set-like structure to a file.
     The contents of the set must be str or bytes.
 
-    It is safe to access the same Set instance from
+    It is safe to access the same instance from
     multiple threads. It is unsafe to get any more
     concurrent than that.
     '''
     @unlocked
     def __init__(self, filename, *args, **kwargs):
         '''
+        If the filename exists, *args and **kwargs must be empty.
+
+        If the filename exists, the new object is populated with the
+        data in the file.
+
+        If *args and **kwargs are set, they get passed to self.factory,
+        and the result overwrites the contents of the file.
+
+        Either way, updates to the new object flow to the file.
+
         :param str filename: File at which to save state
+        :raises EnvironmentError: If the filename is exist and any *args or **kwargs are set
         '''
         self._lock = True
 
-        if len(args) + len(kwargs) > 0:
-            with open(filename, 'w') as fp:
-                fp.write('')
-        elif os.path.exists(filename):
+        if os.path.exists(filename):
             with open(filename, 'r') as fp:
-                self._cache = self.factory(line.rstrip('\r\n') for line in fp)
-        else:
+                self._cache = self.load(fp)
+
+        elif len(args) + len(kwargs) > 0:
+            self._cache = self.factory(*args, **kwargs)
             with open(filename, 'w') as fp:
-                fp.write('')
-            self._cache = self.kfij_factory()
+                self.dump(fp)
 
         self._fp = open(filename, 'a')
         self._lock = False
