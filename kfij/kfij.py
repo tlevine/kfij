@@ -1,15 +1,25 @@
 import os
+from copy import copy
 from functools import wraps
 
 def unlocked(func):
     @wraps(func)
     def f(self, *args, **kwargs):
-        print(func, getattr(self, '_force', None))
-        print(func, getattr(self, '_lock', None))
         if getattr(self, '_force', False) or (not getattr(self, '_lock', False)):
             return func(self, *args, **kwargs)
         else:
             raise EnvironmentError('%s is locked' % repr(self))
+    return f
+
+def lock(func):
+    @wraps(func)
+    @unlocked
+    def f(self, *args, **kwargs):
+        original = copy(getattr(self, '_lock', None))
+        output = func(self, *args, **kwargs)
+        if original != None:
+            self._lock = original
+        return output
     return f
 
 class Kfij:
@@ -46,16 +56,16 @@ class Kfij:
 
         self.cache = self.factory(*args, **kwargs)
 
+        self._force = True
         if os.path.exists(filename):
             with open(filename, 'r') as fp:
                 self._fp = fp
-                self._force = True
                 self.load()
-                self._force = False
         else:
             with open(filename, 'w') as fp:
                 self._fp = fp
                 self.dump()
+        self._force = False
 
         self._fp = open(filename, 'a')
 
@@ -109,11 +119,9 @@ class Kfij:
 
 def _enable_destructive_func(Class, func_name):
     @wraps(getattr(Class.factory, func_name))
-    @unlocked
+    @lock
     def func(self, *args, **kwargs):
-        self._lock = True
         self._fp.close()
-
         os.remove(self._fp.name)
 
         output = getattr(self.cache, func_name)(self.cache, *args, **kwargs)
@@ -121,7 +129,6 @@ def _enable_destructive_func(Class, func_name):
         self._fp = open(self._fp.name, 'a')
         self.dump()
 
-        self._lock = False
         return output
     setattr(Class, func_name, func)
 
