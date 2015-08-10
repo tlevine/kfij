@@ -115,12 +115,11 @@ class Kfij:
     @classmethod
     def enable_safe_funcs(Class, *func_names):
         for func_name in func_names:
-            _enable_safe_func(Class, func_name)
+            _enable_safe_func(Class, str(func_name))
 
 def _enable_safe_func(Class, func_name):
-    _func_name = str(func_name)
-    @wraps(getattr(Class.factory, _func_name))
+    @wraps(getattr(Class.factory, func_name))
     @unlocked
     def func(self, *args, **kwargs):
-        return getattr(self.cache, _func_name)(*args, **kwargs)
+        return getattr(self.cache, func_name)(*args, **kwargs)
     setattr(Class, func_name, func) 
