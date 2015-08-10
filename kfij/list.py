@@ -1,25 +1,19 @@
-from functools import wraps
-
 from .kfij import Kfij
 
-class Set(Kfij):
-    factory = set
+class List(Kfij):
+    factory = list
     def load(self):
-        self.update(self.readlines())
+        self.extend(self.readlines())
     def dump(self):
         self.writelines(self)
-
-    @wraps(set.add)
     def add(self, x):
+        '''
+        :param str x: Item to be added to the set
+        '''
         # Filter
         if x not in self.cache:
             self.writeline(x)
             self.cache.add(x)
-
-    @wraps(set.update)
-    def update(self, iterable):
-        for x in iterable:
-            self.add(x)
 
 Set.enable_safe_funcs('copy', 'isdisjoint', 'issubset',
                       'difference', 'union', 'intersection', 'symmetric_difference',
@@ -32,3 +26,4 @@ Set.enable_destructive_funcs('clear', 'pop', 'remove',
                              'intersection_update',
                              'symmetric_difference_update',
                              'update')
+

@@ -4,9 +4,12 @@ from functools import wraps
 def unlocked(func):
     @wraps(func)
     def f(self, *args, **kwargs):
-        if kwargs.get('_force', False) and getattr(self, '_lock', False):
+        print(func, getattr(self, '_force', None))
+        print(func, getattr(self, '_lock', None))
+        if getattr(self, '_force', False) or (not getattr(self, '_lock', False)):
+            return func(self, *args, **kwargs)
+        else:
             raise EnvironmentError('%s is locked' % repr(self))
-        return func(self, *args, **kwargs)
     return f
 
 class Kfij:
@@ -46,7 +49,9 @@ class Kfij:
         if os.path.exists(filename):
             with open(filename, 'r') as fp:
                 self._fp = fp
+                self._force = True
                 self.load()
+                self._force = False
         else:
             with open(filename, 'w') as fp:
                 self._fp = fp
