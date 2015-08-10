@@ -26,7 +26,7 @@ List.enable_safe_funcs('copy', 'count', 'index',
     '__add__', '__ge__', '__le__', '__len__', '__rmul__',
     '__contains__', '__getitem__', '__lt__',
     '__gt__', '__mul__', 
-    '__reversed__',
+#   '__reversed__',
     '__hash__', '__ne__',
     '__str__',
     '__eq__',
@@ -34,4 +34,4 @@ List.enable_safe_funcs('copy', 'count', 'index',
 
 
 List.enable_destructive_funcs('insert', 'remove', 'sort', 'clear', 'pop', 'reverse',
-                             '__setitem__', '__delitem__', '__imul__')
+                              '__setitem__', '__delitem__', '__imul__', '__iadd__')
