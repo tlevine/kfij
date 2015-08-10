@@ -48,11 +48,20 @@ class Kfij:
             def g(self, *args, **kwargs):
                 if self._lock:
                     raise EnvironmentError('%s is locked' % repr(self))
+
                 self._lock = True
                 self._fp.close()
+
                 os.remove(self._fp.name)
                 f(*args, **kwargs)
+
+                self._fp = open(self._fp.name, 'a')
+
+                for args in self._cache:
+                    self.appender(*args)
+
                 self._lock = False
+
                 return output
 
             setattr(Class, func_name, g)
