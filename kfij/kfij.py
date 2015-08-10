@@ -4,7 +4,7 @@ from functools import wraps
 def unlocked(func):
     @wraps(func)
     def f(self, *args, **kwargs):
-        if getattr(self, '_lock', False):
+        if kwargs.get('_force', False) and getattr(self, '_lock', False):
             raise EnvironmentError('%s is locked' % repr(self))
         return func(self, *args, **kwargs)
     return f

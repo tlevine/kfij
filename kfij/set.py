@@ -5,7 +5,7 @@ from .kfij import Kfij
 class Set(Kfij):
     factory = set
     def load(self):
-        self.update(self.readlines())
+        self.update(self.readlines(), _force = True)
     def dump(self):
         self.writelines(self)
 
