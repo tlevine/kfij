@@ -1,3 +1,3 @@
 from .kfij import Kfij
-from .set import Set
-from .list import List
+from .kfijset import Set
+from .kfijlist import List
