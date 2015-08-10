@@ -123,7 +123,7 @@ def _enable_destructive_func(Class, func_name):
         self._fp.close()
         os.remove(self._fp.name)
 
-        output = getattr(self.cache, func_name)(self.cache, *args, **kwargs)
+        output = getattr(self.cache, func_name)(*args, **kwargs)
 
         self._fp = open(self._fp.name, 'a')
         self.dump()
