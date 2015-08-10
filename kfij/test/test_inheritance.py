@@ -11,13 +11,13 @@ def testcases(*Classes):
         method_names = set(dir(Class)) - set(dir(Kfij)) - {'__iter__'}
         yield from itertools.product([Class], method_names, [tuple(), ('abc',)])
 
-@pytest.mark.parametrize('method_name, args', testcases(List, Set))
-def test_method_call(method_name, args):
+@pytest.mark.parametrize('Class, method_name, args', testcases(List, Set))
+def test_method_call(Class, method_name, args):
     with tempfile.NamedTemporaryFile() as tmp:
         tmp.close()
 
-        kfij = Set(tmp.name)
-        normal = set()
+        kfij = Class(tmp.name)
+        normal = Class.factory()
 
         f = getattr(kfij, method_name)
         try:
