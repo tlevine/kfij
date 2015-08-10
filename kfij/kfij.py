@@ -9,34 +9,38 @@ class Kfij:
     multiple threads. It is unsafe to get any more
     concurrent than that.
     '''
-    def __init__(self, filename):
+    def __init__(self, filename, *args, **kwargs):
         '''
         :param str filename: File at which to save state
         '''
 
-        if os.path.exists(filename):
+        if len(args) + len(kwargs) > 0:
+            with open(filename, 'w') as fp:
+                fp.write('')
+        elif os.path.exists(filename):
             with open(filename, 'r') as fp:
                 self._cache = self.factory(line.rstrip('\r\n') for line in fp)
         else:
             with open(filename, 'w') as fp:
                 fp.write('')
-            self._cache = self.factory()
+            self._cache = self.kfij_factory()
 
         self._fp = open(filename, 'a')
 
     @staticmethod
-    def factory(*args, **kwargs):
+    def kfij_factory(*args, **kwargs):
         '''
         You must set the factory equal to the class that the present class is mimicing, such as set or list.
         '''
-        raise NotImplementedError('You must set the %s.factory.', self.__class__.__name__)
+        raise NotImplementedError('You must set the %s.kfij_factory.', self.__class__.__name__)
 
-    def appender(*args, **kwargs):
+    def kfij_extend(self, old):
         '''
-        You must set this to the function that adds a new line.
-        This is "add" for sets and "append" for lists, for example.
+        You must set this to the function to a function that extends
+        the present Kfij with the data from an old one.
+        This is "extend" for sets and "update" for dicts, for example.
         '''
-        raise NotImplementedError('You must set the %s.appender.', self.__class__.__name__)
+        raise NotImplementedError('You must set the %s.kfij_extend.', self.__class__.__name__)
 
     @classmethod
     def apply_destructive_funcs(Class, *func_names):
