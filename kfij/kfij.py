@@ -10,12 +10,16 @@ def unlocked(func):
 
 class Kfij:
     '''
-    Persist a set-like structure to a file.
-    The contents of the set must be str or bytes.
+    Persist objects of an existing class to a file. It is safe to access the same
+    instance from multiple threads. It is unsafe to get any more concurrent than that.
 
-    It is safe to access the same instance from
-    multiple threads. It is unsafe to get any more
-    concurrent than that.
+    Use the enable_safe_funcs and enable_destructive_funcs to stupidly copy methods
+    from the class that you are persisting. The safe functions should not update the
+    present object. The destructive functions should update the present object, and
+    they rewrite the entire corresponding file every time they are called.
+
+    You probably don't need to rewrite the entire file every time, so you should
+    write your own versions of functions that don't need to do this.
     '''
     @unlocked
     def __init__(self, filename, *args, **kwargs):
@@ -31,15 +35,17 @@ class Kfij:
         Either way, updates to the new object flow to the file.
 
         :param str filename: File at which to save state
-        :raises EnvironmentError: If the filename is exist and any *args or **kwargs are set
+        :raises EnvironmentError: If the file already exists and any *args or **kwargs are set
         '''
         self._lock = True
+
+        if os.path.exists(filename) and len(args) + len(kwargs) > 0:
+            raise EnvironmentError('If the file already exists, no *args or **kwargs may be set.')
 
         if os.path.exists(filename):
             with open(filename, 'r') as fp:
                 self._cache = self.load(fp)
-
-        elif len(args) + len(kwargs) > 0:
+        else:
             self._cache = self.factory(*args, **kwargs)
             with open(filename, 'w') as fp:
                 self.dump(fp)
@@ -62,7 +68,7 @@ class Kfij:
         '''
         raise NotImplementedError('You must set %s.load.', self.__class__.__name__)
         for line in fp:
-            self.append line.rstrip('\r\n')
+            self.append(line.rstrip('\r\n'))
 
     def dump(self, fp):
         '''
