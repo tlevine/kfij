@@ -120,6 +120,19 @@ class Set(Kfij):
     def dump(self, fp):
         for x in self:
             fp.write(x + '\n')
+
+    def add(self, x):
+        '''
+        :param str x: Item to be added to the set
+        '''
+        if not isinstance(x, str) or '\r' in x or '\n' in x:
+            raise NotImplementedError('Can\'t handle this sort of value')
+
+        # Filter
+        if x not in self.cache:
+            self.cache.add(x)
+            self.fp.write(x + '\n')
+
 Set.enable_safe_funcs('copy', 'isdisjoint', 'issubset',
                       'difference', 'union', 'intersection', 'symmetric_difference',
                       '__contains__', '__len__',
