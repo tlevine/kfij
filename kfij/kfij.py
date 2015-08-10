@@ -1,9 +1,10 @@
+import os
 from functools import wraps
 
 def unlocked(func):
     @wraps(func)
     def f(self, *args, **kwargs):
-        if self._lock:
+        if getattr(self, '_lock', False):
             raise EnvironmentError('%s is locked' % repr(self))
         return func(self, *args, **kwargs)
     return f
@@ -44,13 +45,13 @@ class Kfij:
 
         if os.path.exists(filename):
             with open(filename, 'r') as fp:
-                self._cache = self.load(fp)
+                self.cache = self.load(fp)
         else:
-            self._cache = self.factory(*args, **kwargs)
+            self.cache = self.factory(*args, **kwargs)
             with open(filename, 'w') as fp:
                 self.dump(fp)
 
-        self._fp = open(filename, 'a')
+        self.fp = open(filename, 'a')
         self._lock = False
 
     @staticmethod
@@ -76,22 +77,22 @@ class Kfij:
         raise NotImplementedError('You must set %s.dump.', self.__class__.__name__)
 
     @classmethod
-    def apply_destructive_funcs(Class, *func_names):
+    def enable_destructive_funcs(Class, *func_names):
         for func_name in func_names:
 
-            f = getattr(self._cache, func_name)
+            f = getattr(Class.factory, func_name)
 
             @wraps(f)
             @unlocked
             def g(self, *args, **kwargs):
                 self._lock = True
-                self._fp.close()
+                self.fp.close()
 
-                os.remove(self._fp.name)
-                f(*args, **kwargs)
+                os.remove(self.fp.name)
+                f(self.cache, *args, **kwargs)
 
-                self._fp = open(self._fp.name, 'a')
-                self.dump(self._fp)
+                self.fp = open(self._fp.name, 'a')
+                self.dump(self.fp)
 
                 self._lock = False
                 return output
@@ -99,48 +100,14 @@ class Kfij:
             setattr(Class, func_name, g)
 
     @classmethod
-    def apply_safe_funcs(Class, *func_names):
+    def enable_safe_funcs(Class, *func_names):
         for func_name in func_names:
 
-            f = getattr(self._cache, func_name)
+            f = getattr(Class.factory, func_name)
 
             @wraps(f)
+            @unlocked
             def g(self, *args, **kwargs):
-                if self._lock:
-                    raise EnvironmentError('%s is locked' % repr(self))
-                return f(*args, **kwargs)
+                return f(self.cache, *args, **kwargs)
 
-            setattr(Class, func_name, g)
-        
-class Set(Kfij):
-    factory = set
-    def load(self, fp):
-        for line in fp:
-            self.add(line.rstrip('\r\n'))
-    def dump(self, fp):
-        for x in self:
-            fp.write(x + '\n')
-
-    def add(self, x):
-        '''
-        :param str x: Item to be added to the set
-        '''
-        if not isinstance(x, str) or '\r' in x or '\n' in x:
-            raise NotImplementedError('Can\'t handle this sort of value')
-
-        # Filter
-        if x not in self.cache:
-            self.cache.add(x)
-            self.fp.write(x + '\n')
-
-Set.enable_safe_funcs('copy', 'isdisjoint', 'issubset',
-                      'difference', 'union', 'intersection', 'symmetric_difference',
-                      '__contains__', '__len__',
-                      '__sub__', '__rsub__',
-                      '__and__', '__or__',
-                      '__rand__', '__ror__', '__rxor__',
-                      '__ge__', '__gt__', '__le__', '__lt__', '__eq__')
-Set.enable_destructive_funcs('clear', 'pop', 'remove',
-                             'intersection_update',
-                             'symmetric_difference_update',
-                             'update')
+            setattr(Class, func_name, g) 
