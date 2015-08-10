@@ -6,8 +6,7 @@ class Set(Kfij):
         for line in self.readlines():
             self.add(line)
     def dump(self):
-        for x in self:
-            self.writeline(x)
+        self.writelines(self)
     def add(self, x):
         '''
         :param str x: Item to be added to the set

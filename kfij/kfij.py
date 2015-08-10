@@ -45,10 +45,12 @@ class Kfij:
 
         if os.path.exists(filename):
             with open(filename, 'r') as fp:
-                self.load(fp)
+                self._fp = fp
+                self.load()
         else:
             with open(filename, 'w') as fp:
-                self.dump(fp)
+                self._fp = fp
+                self.dump()
 
         self._fp = open(filename, 'a')
 
@@ -64,7 +66,7 @@ class Kfij:
         :raises NotImplementedError: If the line contains carriage return or newline
         '''
         for text in lines:
-            if not isinstance(text, str) or '\r' in x or '\n' in x:
+            if not isinstance(text, str) or '\r' in text or '\n' in text:
                 raise NotImplementedError('Can\'t handle this sort of value')
             self._fp.write(text + '\n')
 
@@ -75,7 +77,7 @@ class Kfij:
         '''
         raise NotImplementedError('You must set the %s.kfij_factory.', self.__class__.__name__)
 
-    def load(self, fp):
+    def load(self):
         '''
         This must be a static method that takes a file pointer, parses the format created by
         the dump function, and updates the present object with the data from the file. Assume
@@ -83,7 +85,7 @@ class Kfij:
         '''
         raise NotImplementedError('You must set %s.load.', self.__class__.__name__)
 
-    def dump(self, fp):
+    def dump(self):
         '''
         You must set this to the function to a function that serializes the present
         object in a form that the load function can parse.
@@ -104,7 +106,7 @@ class Kfij:
                 output = getattr(self.cache, func_name)(self.cache, *args, **kwargs)
 
                 self._fp = open(self._fp.name, 'a')
-                self.dump(self._fp)
+                self.dump()
 
                 self._lock = False
                 return output
