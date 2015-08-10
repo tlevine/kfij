@@ -34,19 +34,22 @@ class Kfij:
         '''
         raise NotImplementedError('You must set the %s.kfij_factory.', self.__class__.__name__)
 
-    def load_line(self, line):
+    def load(self, fp):
         '''
-        The load_line method should take a string line from a file and update the present
-        object accordingly.
+        This must be a static method that takes a file pointer, parses the format created by
+        the dump function, and updates the present object with the data from the file. Assume
+        that the present object is empty before load is called.
         '''
-        raise NotImplementedError('You must set the %s.kfij_factory.', self.__class__.__name__)
+        raise NotImplementedError('You must set %s.load.', self.__class__.__name__)
+        for line in fp:
+            self.append line.rstrip('\r\n')
 
     def dump(self, fp):
         '''
         You must set this to the function to a function that serializes the present
-        object in a form that the load_line function can parse.
+        object in a form that the load function can parse.
         '''
-        raise NotImplementedError('You must set the %s.kfij_extend.', self.__class__.__name__)
+        raise NotImplementedError('You must set %s.dump.', self.__class__.__name__)
         for x in self:
             fp.write(x + '\n')
 
