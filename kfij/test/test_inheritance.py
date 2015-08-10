@@ -2,15 +2,16 @@ import tempfile, itertools
 
 import pytest
 
-from ..kfij import Kfij
-from ..kfijset import Set
+from .. import Kfij, List, Set
 
 # @pytest.mark.randomize(func, ncalls=10)
 
-method_names = set(dir(Set)) - set(dir(Kfij)) - {'__iter__'}
-method_calls = itertools.product(method_names, [tuple(), ('abc',)])
+def testcases(*Classes):
+    for Class in Classes:
+        method_names = set(dir(Class)) - set(dir(Kfij)) - {'__iter__'}
+        yield from itertools.product([Class], method_names, [tuple(), ('abc',)])
 
-@pytest.mark.parametrize('method_name, args', method_calls)
+@pytest.mark.parametrize('method_name, args', testcases(List, Set))
 def test_method_call(method_name, args):
     with tempfile.NamedTemporaryFile() as tmp:
         tmp.close()
