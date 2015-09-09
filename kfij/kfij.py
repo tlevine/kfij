@@ -89,7 +89,7 @@ class Kfij:
         '''
         You must set the factory equal to the class that the present class is mimicing, such as set or list.
         '''
-        raise NotImplementedError('You must set the %s.kfij_factory.', self.__class__.__name__)
+        raise NotImplementedError('You must set the %s.factory.', self.__class__.__name__)
 
     def load(self):
         '''
