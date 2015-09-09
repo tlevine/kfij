@@ -9,7 +9,7 @@ def test_flush_writes(Class, method_name):
     with tempfile.NamedTemporaryFile() as tmp:
         for letter in 'abcde':
             old_size = os.stat(tmp.name).st_size
-            getattr(Class(tmp.name), method_name)(letter)
+            getattr(Class(tmp.name), method_name)(str(letter))
             new_size = os.stat(tmp.name).st_size
             assert old_size + 2 == new_size
 
